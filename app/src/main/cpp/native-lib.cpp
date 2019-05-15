@@ -231,3 +231,87 @@ Java_com_fast_flyer_ffmpeg_utils_VideoUtils_decodeVieoForYUV(JNIEnv *env, jclass
 
     return true;
 }
+
+
+extern "C"
+JNIEXPORT jboolean JNICALL
+Java_com_fast_flyer_ffmpeg_utils_VideoUtils_changeVolume(JNIEnv *env, jclass type, jstring inPath_,
+                                                         jstring outPath_, jfloat volume) {
+
+    const char *inPath = env->GetStringUTFChars(inPath_, 0);
+    const char *outPath = env->GetStringUTFChars(outPath_, 0);
+
+    int ret;
+    Frame *in_frame, *out_frame;
+    size_t max_len = 1024 * 2 * 2; //nb_sample * s16所占位数 * 声道数
+    Filter *filter;
+    int len = 0;
+
+    FILE *out_file;
+    int8_t *buf = static_cast<int8_t *>(malloc(max_len));
+
+
+
+
+
+    out_file = fopen(outPath, "wb+");
+
+    filter = find_filter_by_name("volume");
+
+
+    ret = filter->set_option_value("volume", "2");
+
+    ret = filter->set_option_value("format", "s16");
+
+    ret = filter->set_option_value("channel", "2");
+
+    ret = filter->set_option_value("rate", "44100");
+
+
+    ret = filter->init();
+
+    in_frame = malloc_frame(AUDIO);
+
+    FILE* inputFile = fopen(inPath,"r");
+
+
+    while ((len = fread(buf, sizeof(int8_t),max_len,inputFile)) > 0)
+    {
+
+        frame_set_data(in_frame, buf, static_cast<const size_t>(len));
+        filter->add_frame(in_frame);
+        out_frame = filter->get_frame();
+        if (out_frame)
+        {
+            fwrite(out_frame->data[0], 1, static_cast<size_t>(out_frame->linesize[0]), out_file);
+            free_frame(&out_frame);
+        }
+    }
+
+    fclose(inputFile);
+
+    free(buf);
+    free_frame(&in_frame);
+    fclose(out_file);
+    free_filter(&filter);
+    env->ReleaseStringUTFChars(inPath_, inPath);
+    env->ReleaseStringUTFChars(outPath_, outPath);
+
+    return true;
+}
+
+
+extern "C"
+JNIEXPORT jboolean JNICALL
+Java_com_fast_flyer_ffmpeg_utils_VideoUtils_mixAudio(JNIEnv *env, jclass type, jstring inPath_,
+                                                     jstring inPath2_, jstring outPath_) {
+    const char *inPath = env->GetStringUTFChars(inPath_, 0);
+    const char *inPath2 = env->GetStringUTFChars(inPath2_, 0);
+    const char *outPath = env->GetStringUTFChars(outPath_, 0);
+
+    // TODO
+
+    env->ReleaseStringUTFChars(inPath_, inPath);
+    env->ReleaseStringUTFChars(inPath2_, inPath2);
+    env->ReleaseStringUTFChars(outPath_, outPath);
+}

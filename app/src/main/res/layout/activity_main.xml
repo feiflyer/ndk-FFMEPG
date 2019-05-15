@@ -22,4 +22,18 @@
         android:text="video_encode"
         android:padding="20dp"/>
 
+    <Button
+        android:id="@+id/changeVolume"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="changeVolume"
+        android:padding="20dp"/>
+
+    <Button
+        android:id="@+id/mixAudio"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="mixAudio"
+        android:padding="20dp"/>
+
 </android.support.v7.widget.LinearLayoutCompat>
