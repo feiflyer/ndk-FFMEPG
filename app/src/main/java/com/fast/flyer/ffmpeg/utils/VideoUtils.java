@@ -26,4 +26,8 @@ public final class VideoUtils {
 
 
     public static native boolean mixAudio(String inPath,String inPath2, String outPath);
+
+    public static native boolean mixAudioWithVolume(String bgmPath,String recordPath, String outPath,String bgmVolume,String recordVolume);
+
+    public static native byte[] mixAudio(byte[] bgmBytes,float bgmVolume, byte[] recordBytes, float recordVolume);
 }

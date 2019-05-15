@@ -60,7 +60,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }else  if(v == mixAudio){
 
 
-            VideoUtils.mixAudio(localPcmPath,localPcmPath2,mixPcmOutPath);
+            Log.i("aaaaaa", "混音开启");
+
+//            VideoUtils.mixAudio(localPcmPath,localPcmPath2,mixPcmOutPath);
+
+            VideoUtils.mixAudioWithVolume(localPcmPath, localPcmPath2, mixPcmOutPath, 1+"", 0.2+"");
 
             Log.i("aaaaaa", "混音成功");
 

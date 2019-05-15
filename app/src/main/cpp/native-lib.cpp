@@ -300,6 +300,14 @@ Java_com_fast_flyer_ffmpeg_utils_VideoUtils_changeVolume(JNIEnv *env, jclass typ
     return true;
 }
 
+unsigned char *mixAudio(unsigned char *bgmchar, float bgmVolume, unsigned char *bgmChar, float recordVolume)
+{
+
+//    unsigned char *bgmChar = static_cast<unsigned char *>(malloc(sizeof(unsigned char) * bgmSize));
+
+    return 0;
+
+}
 
 extern "C"
 JNIEXPORT jboolean JNICALL
@@ -360,7 +368,9 @@ Java_com_fast_flyer_ffmpeg_utils_VideoUtils_mixAudio(JNIEnv *env, jclass type, j
     while ((len0 = fread(buf0, sizeof(int8_t),max_len,inputFile0)) > 0 && (len1 = fread(buf1, sizeof(int8_t),max_len,inputFile1)) > 0)
     {
         frame_set_data(in_frame0, buf0, static_cast<const size_t>(len0));
+
         filter->add_frame(in_frame0, 0);
+
         frame_set_data(in_frame1, buf1, static_cast<const size_t>(len1));
         filter->add_frame(in_frame1, 1);
         out_frame = filter->get_frame();
@@ -383,6 +393,230 @@ Java_com_fast_flyer_ffmpeg_utils_VideoUtils_mixAudio(JNIEnv *env, jclass type, j
     env->ReleaseStringUTFChars(inPath_, inPath);
     env->ReleaseStringUTFChars(inPath2_, inPath2);
     env->ReleaseStringUTFChars(outPath_, outPath);
+
+    return true;
+}
+
+extern "C"
+JNIEXPORT jbyteArray JNICALL
+Java_com_fast_flyer_ffmpeg_utils_VideoUtils_mixAudio___3BF_3BF(JNIEnv *env, jclass type,
+                                                               jbyteArray bgmBytes_,
+                                                               jfloat bgmVolume,
+                                                               jbyteArray recordBytes_,
+                                                               jfloat recordVolume) {
+
+    jbyte *bgmBytes = env->GetByteArrayElements(bgmBytes_, NULL);
+    jbyte *recordBytes = env->GetByteArrayElements(recordBytes_, NULL);
+
+
+    mixAudio(reinterpret_cast<unsigned char *>(bgmBytes), bgmVolume, reinterpret_cast<unsigned char *>(recordBytes), recordVolume);
+
+
+    env->ReleaseByteArrayElements(bgmBytes_, bgmBytes, 0);
+    env->ReleaseByteArrayElements(recordBytes_, recordBytes, 0);
+}
+
+
+
+extern "C"
+JNIEXPORT jboolean JNICALL
+Java_com_fast_flyer_ffmpeg_utils_VideoUtils_mixAudioWithVolume(JNIEnv *env, jclass type,
+                                                               jstring bgmPath_,
+                                                               jstring recordPath_,
+                                                               jstring outPath_, jstring bgmVolume_,
+                                                               jstring recordVolume_) {
+
+    const char *bgmPath = env->GetStringUTFChars(bgmPath_, 0);
+    const char *recordPath = env->GetStringUTFChars(recordPath_, 0);
+    const char *outPath = env->GetStringUTFChars(outPath_, 0);
+    const char *bgmVolume = env->GetStringUTFChars(bgmVolume_, 0);
+    const char *recordVolume = env->GetStringUTFChars(recordVolume_, 0);
+
+
+    int ret;
+
+    //初始化音量过滤器
+    Filter *bgm_volume_filter;
+
+    bgm_volume_filter = find_filter_by_name("volume");
+
+
+    ret = bgm_volume_filter->set_option_value("volume", bgmVolume);
+
+    ret = bgm_volume_filter->set_option_value("format", "s16");
+
+    ret = bgm_volume_filter->set_option_value("channel", "2");
+
+    ret = bgm_volume_filter->set_option_value("rate", "44100");
+
+
+    ret = bgm_volume_filter->init();
+
+
+    Filter *record_volume_filter;
+
+    record_volume_filter = find_filter_by_name("volume");
+
+
+    ret = record_volume_filter->set_option_value("volume", recordVolume);
+
+    ret = record_volume_filter->set_option_value("format", "s16");
+
+    ret = record_volume_filter->set_option_value("channel", "2");
+
+    ret = record_volume_filter->set_option_value("rate", "44100");
+
+    ret = record_volume_filter->init();
+
+//    in_frame = malloc_frame(AUDIO);
+//
+//    FILE* inputFile = fopen(inPath,"r");
+
+
+//    while ((len = fread(buf, sizeof(int8_t),max_len,inputFile)) > 0)
+//    {
+//
+//        frame_set_data(in_frame, buf, static_cast<const size_t>(len));
+//        filter->add_frame(in_frame);
+//        out_frame = filter->get_frame();
+//        if (out_frame)
+//        {
+//            fwrite(out_frame->data[0], 1, static_cast<size_t>(out_frame->linesize[0]), out_file);
+//            free_frame(&out_frame);
+//        }
+//    }
+//
+//    fclose(inputFile);
+//
+//    free(buf);
+//    free_frame(&in_frame);
+//    fclose(out_file);
+//    free_filter(&filter);
+//    env->ReleaseStringUTFChars(inPath_, inPath);
+//    env->ReleaseStringUTFChars(outPath_, outPath);
+
+
+    // TODO
+
+    //初始化混音过滤器
+    Filter *amixFilter;
+    amixFilter = find_filter_by_name("amix");
+
+    ret = amixFilter->set_option_value("format_in0", "s16");
+
+    ret = amixFilter->set_option_value("channel_in0", "2");
+
+    ret = amixFilter->set_option_value("rate_in0", "44100");
+
+    ret = amixFilter->set_option_value("format_in1", "s16");
+
+    ret = amixFilter->set_option_value("channel_in1", "2");
+
+    ret = amixFilter->set_option_value("rate_in1", "44100");
+
+    ret = amixFilter->set_option_value("format_out", "s16");
+
+    ret = amixFilter->set_option_value("channel_out", "2");
+
+    ret = amixFilter->set_option_value("rate_out", "44100");
+
+    ret = amixFilter->init();
+
+
+    Frame *in_bgm_frame, *in_record_frame, *out_bgm_frame,*out_record_frame,*out_mix_frame;
+
+    size_t max_len = 1024 * 2 * 2;
+
+    int bgmLen = 0, recordLen = 0;
+
+    FILE *out_file;
+
+    int8_t *bgmBuf = static_cast<int8_t *>(malloc(max_len));
+
+    int8_t *recordBuf = static_cast<int8_t *>(malloc(max_len));
+
+    out_file = fopen(outPath, "wb+");
+
+    in_bgm_frame = malloc_frame(AUDIO);
+
+    in_record_frame = malloc_frame(AUDIO);
+
+    FILE* bgmFILE = fopen(bgmPath,"r");
+
+    FILE* recordFILE = fopen(recordPath,"r");
+
+
+    LOGW("aaaaa--while");
+
+    while ((bgmLen = fread(bgmBuf, sizeof(int8_t),max_len,bgmFILE)) > 0 && (recordLen = fread(recordBuf, sizeof(int8_t),max_len,recordFILE)) > 0 && bgmLen == recordLen)
+    {
+
+       LOGW("aaaaa--while");
+        //改变音量
+
+        frame_set_data(in_bgm_frame, bgmBuf, static_cast<const size_t>(bgmLen));
+        bgm_volume_filter->add_frame(in_bgm_frame);
+        out_bgm_frame = bgm_volume_filter->get_frame();
+
+
+        frame_set_data(in_record_frame, recordBuf, static_cast<const size_t>(recordLen));
+        record_volume_filter->add_frame(in_record_frame);
+        out_record_frame = record_volume_filter->get_frame();
+
+
+        if(out_bgm_frame && out_record_frame){
+
+
+            //混音
+
+            frame_set_data(in_bgm_frame, out_bgm_frame->data[0], static_cast<size_t>(out_bgm_frame->linesize[0]));
+
+            amixFilter->add_frame(in_bgm_frame, 0);
+
+            frame_set_data(in_record_frame, out_record_frame->data[0], static_cast<size_t>(out_record_frame->linesize[0]));
+
+            amixFilter->add_frame(in_record_frame, 1);
+
+            out_mix_frame = amixFilter->get_frame();
+
+
+            free_frame(&out_bgm_frame);
+            free_frame(&out_record_frame);
+
+            if (out_mix_frame)
+            {
+                fwrite(out_mix_frame->data[0], 1, static_cast<size_t>(out_mix_frame->linesize[0]), out_file);
+                free_frame(&out_mix_frame);
+            }
+
+        }
+
+
+    }
+
+
+    LOGW("aaaaa--free");
+
+    free(bgmBuf);
+    free(recordBuf);
+
+    free_frame(&in_bgm_frame);
+    free_frame(&in_record_frame);
+
+    fclose(bgmFILE);
+    fclose(recordFILE);
+    fclose(out_file);
+
+    free_filter(&bgm_volume_filter);
+    free_filter(&record_volume_filter);
+    free_filter(&amixFilter);
+
+
+    env->ReleaseStringUTFChars(bgmPath_, bgmPath);
+    env->ReleaseStringUTFChars(recordPath_, recordPath);
+    env->ReleaseStringUTFChars(outPath_, outPath);
+    env->ReleaseStringUTFChars(bgmVolume_, bgmVolume);
+    env->ReleaseStringUTFChars(recordVolume_, recordVolume);
 
     return true;
 }
