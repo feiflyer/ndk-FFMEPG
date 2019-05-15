@@ -309,9 +309,80 @@ Java_com_fast_flyer_ffmpeg_utils_VideoUtils_mixAudio(JNIEnv *env, jclass type, j
     const char *inPath2 = env->GetStringUTFChars(inPath2_, 0);
     const char *outPath = env->GetStringUTFChars(outPath_, 0);
 
-    // TODO
+    int ret;
+
+    Frame *in_frame0, *in_frame1, *out_frame;
+    size_t max_len = 1024 * 2 * 2;
+    Filter *filter;
+    int len0 = 0, len1 = 0;
+    FILE *out_file;
+
+    int8_t *buf0 = static_cast<int8_t *>(malloc(max_len));
+    int8_t *buf1 = static_cast<int8_t *>(malloc(max_len));
+
+
+    out_file = fopen(outPath, "wb+");
+
+
+    filter = find_filter_by_name("amix");
+
+
+    ret = filter->set_option_value("format_in0", "s16");
+
+    ret = filter->set_option_value("channel_in0", "2");
+
+    ret = filter->set_option_value("rate_in0", "44100");
+
+    ret = filter->set_option_value("format_in1", "s16");
+
+    ret = filter->set_option_value("channel_in1", "2");
+
+    ret = filter->set_option_value("rate_in1", "44100");
+
+    ret = filter->set_option_value("format_out", "s16");
+
+    ret = filter->set_option_value("channel_out", "2");
+
+    ret = filter->set_option_value("rate_out", "44100");
+
+
+    ret = filter->init();
+
+    in_frame0 = malloc_frame(AUDIO);
+    in_frame1 = malloc_frame(AUDIO);
+
+
+    FILE* inputFile0 = fopen(inPath,"r");
+
+    FILE* inputFile1 = fopen(inPath2,"r");
+
+
+    while ((len0 = fread(buf0, sizeof(int8_t),max_len,inputFile0)) > 0 && (len1 = fread(buf1, sizeof(int8_t),max_len,inputFile1)) > 0)
+    {
+        frame_set_data(in_frame0, buf0, static_cast<const size_t>(len0));
+        filter->add_frame(in_frame0, 0);
+        frame_set_data(in_frame1, buf1, static_cast<const size_t>(len1));
+        filter->add_frame(in_frame1, 1);
+        out_frame = filter->get_frame();
+        if (out_frame)
+        {
+            fwrite(out_frame->data[0], 1, static_cast<size_t>(out_frame->linesize[0]), out_file);
+            free_frame(&out_frame);
+        }
+    }
+
+    free(buf0);
+    free(buf1);
+    free_frame(&in_frame0);
+    free_frame(&in_frame1);
+    fclose(inputFile0);
+    fclose(inputFile1);
+    fclose(out_file);
+    free_filter(&filter);
 
     env->ReleaseStringUTFChars(inPath_, inPath);
     env->ReleaseStringUTFChars(inPath2_, inPath2);
     env->ReleaseStringUTFChars(outPath_, outPath);
+
+    return true;
 }

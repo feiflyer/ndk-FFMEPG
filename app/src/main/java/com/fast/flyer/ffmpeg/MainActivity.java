@@ -27,6 +27,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private String changeVolumePcmOutPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/PCM_改变音量.pcm";
 
+    private String mixPcmOutPath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/PCM_混音.pcm";
+
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -56,6 +60,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }else  if(v == mixAudio){
 
 
+            VideoUtils.mixAudio(localPcmPath,localPcmPath2,mixPcmOutPath);
+
+            Log.i("aaaaaa", "混音成功");
+
+            playPCM(mixPcmOutPath);
 
         }else  if(v == changeVolume){
 
