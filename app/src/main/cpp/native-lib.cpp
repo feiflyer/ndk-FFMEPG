@@ -2,6 +2,12 @@
 #include <string>
 #include "LOGUtils.h"
 
+#include "ffmpeg_filter.h"
+#include "hash_compare.h"
+#include "amix_filter.h"
+#include "volume_filter.h"
+
+
 extern "C" {
 
 #include "libavformat/avformat.h"
