@@ -6,8 +6,14 @@ extern "C" {
 #include "libavfilter/buffersink.h"
 #include "libavfilter/buffersrc.h"
 #include "libavutil/channel_layout.h"
-};
+#include "libavutil/samplefmt.h"
+#include "libavutil/samplefmt.h"
+#include "libavutil/channel_layout.h"
+#include "libavfilter/avfilter.h"
+}
 
+#include <string>
+#include <stdint.h>
 #include "ffmpeg_filter.h"
 
 class AmixFilter : public Filter {

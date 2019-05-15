@@ -14,6 +14,11 @@ android {
             cmake {
                 // 制定c++的版本
                 cppFlags "-std=c++11"
+
+//                cFlags "-DTEST_C_FLAG1", "-DTEST_C_FLAG2"  // output dir -> 'src/main/libs'
+//                cppFlags  "-D__STDC_CONSTANT_MACROS"
+
+//                cppFlags "-std=c++11","-D__STDC_CONSTANT_MACROS"
             }
 
             ndk {

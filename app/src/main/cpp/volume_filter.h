@@ -8,13 +8,20 @@ extern "C" {
 #include "libavfilter/buffersink.h"
 #include "libavfilter/buffersrc.h"
 #include "libavutil/channel_layout.h"
-};
+#include "libavutil/samplefmt.h"
+#include "libavutil/channel_layout.h"
+#include "libavfilter/avfilter.h"
+#include "libavutil/dict.h"
+}
 
 class VolumeFilter : public Filter {
 
 public:
+
     VolumeFilter();
+
     ~VolumeFilter();
+
     int set_option_value(std::string key, std::string vaule);
     int init();
     int add_frame(Frame *frame, int index = 0);

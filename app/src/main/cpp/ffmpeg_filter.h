@@ -4,6 +4,9 @@
 
 #include <string>
 #include <stdint.h>
+#include <cstring>
+#include <cstdlib>
+#include <android/log.h>
 
 typedef enum _DataType {
     AUDIO, VIDEO

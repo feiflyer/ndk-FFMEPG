@@ -6,7 +6,8 @@
 cmake_minimum_required(VERSION 3.4.1)
 
 #设置源文件
-file(GLOB native-lib-source src/main/cpp/*.cpp)
+file(GLOB native-lib-source "src/main/cpp/*.*")
+
 
 #添加头文件路径（相对于本文件路径）
 include_directories(src/main/cpp/ffmpeg)
@@ -30,6 +31,8 @@ set_target_properties(swscale PROPERTIES IMPORTED_LOCATION ${FF}/libswscale.so)
 add_library(swresample SHARED IMPORTED)
 set_target_properties(swresample PROPERTIES IMPORTED_LOCATION ${FF}/libswresample.so)
 
+add_library(avfilter SHARED IMPORTED)
+set_target_properties(avfilter PROPERTIES IMPORTED_LOCATION ${FF}/libavfilter.so)
 
 # Creates and names a library, sets it as either STATIC
 # or SHARED, and provides the relative paths to its source code.
@@ -79,6 +82,8 @@ target_link_libraries( # Specifies the target library.
                       swscale
 
                       swresample
+
+                      avfilter
 
 
                       android
